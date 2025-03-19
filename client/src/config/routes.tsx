@@ -1,5 +1,5 @@
 const routes = {
-    home: '/OMRScanner',
+    home: '/',
     result: '/result',
 }
 
