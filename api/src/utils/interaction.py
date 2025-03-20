@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import os
 
 import cv2
 from screeninfo import get_monitors
@@ -6,7 +7,11 @@ from screeninfo import get_monitors
 from src.logger import logger
 from src.utils.image import ImageUtils
 
-monitor_window = get_monitors()[0]
+if "RENDER" not in os.environ:  # Chạy code này nếu không phải trên Render
+    from screeninfo import get_monitors
+    monitor_window = get_monitors()[0]
+else:
+    monitor_window = None
 
 
 @dataclass
@@ -91,9 +96,9 @@ class Stats:
 
 
 def wait_q():
-    esc_key = 27
-    while cv2.waitKey(1) & 0xFF not in [ord("q"), esc_key]:
-        pass
+    # esc_key = 27
+    # while cv2.waitKey(1) & 0xFF not in [ord("q"), esc_key]:
+    #     pass
     cv2.destroyAllWindows()
 
 
