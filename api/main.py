@@ -1,19 +1,26 @@
-"""
-
- OMRChecker
-
- Author: Udayraj Deshmukh
- Github: https://github.com/Udayraj123
-
-"""
-
 import argparse
 import sys
 from pathlib import Path
+from fastapi import FastAPI, UploadFile, File, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
+import shutil
+import uvicorn
 
 from src.entry import entry_point
 from src.logger import logger
 
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"], 
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+INPUT_DIR = Path("inputs")
+INPUT_DIR.mkdir(exist_ok=True)
 
 def parse_args():
     # construct the argument parse and parse the arguments
@@ -93,7 +100,18 @@ def entry_point_for_args(args):
             args,
         )
 
+def process_image():
+    args = parse_args()
+    entry_point_for_args(args) 
+
+@app.post("/process-image/")
+async def upload_file(file: UploadFile = File(...), background_tasks: BackgroundTasks = BackgroundTasks()):
+    file_path = INPUT_DIR / file.filename
+    with file_path.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    background_tasks.add_task(process_image)  # Xử lý ảnh sau khi tải lên
+    return {"message": "File uploaded successfully", "filename": file.filename}
 
 if __name__ == "__main__":
-    args = parse_args()
-    entry_point_for_args(args)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
