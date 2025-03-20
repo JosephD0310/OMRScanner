@@ -16,7 +16,7 @@ function Result() {
       formData.append("file", blob, "image.png");
 
       // Gửi ảnh lên Backend
-      const response = await axios.post("http://localhost:8000/process-image/", formData, {
+      const response = await axios.post("https://omrscanner-lfi1.onrender.com/process-image/", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
