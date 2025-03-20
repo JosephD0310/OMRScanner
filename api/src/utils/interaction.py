@@ -2,23 +2,33 @@ from dataclasses import dataclass
 import os
 
 import cv2
-from screeninfo import get_monitors
 
 from src.logger import logger
 from src.utils.image import ImageUtils
 
-if "RENDER" not in os.environ:  # Chạy code này nếu không phải trên Render
-    from screeninfo import get_monitors
-    monitor_window = get_monitors()[0]
+# Xử lý trường hợp chạy trên Render
+if "RENDER" not in os.environ:
+    try:
+        from screeninfo import get_monitors
+        monitors = get_monitors()
+        monitor_window = monitors[0] if monitors else None
+    except Exception:
+        monitor_window = None  # Phòng trường hợp screeninfo không hoạt động
 else:
-    monitor_window = None
+    monitor_window = None  # Render không có màn hình vật lý
 
 
 @dataclass
 class ImageMetrics:
-    # TODO: Move TEXT_SIZE, etc here and find a better class name
-    window_width, window_height = monitor_window.width, monitor_window.height
-    # for positioning image windows
+    """Lưu trữ thông tin về kích thước cửa sổ hiển thị hình ảnh"""
+    default_width = 1920
+    default_height = 1080
+
+    if monitor_window:
+        window_width, window_height = monitor_window.width, monitor_window.height
+    else:
+        window_width, window_height = default_width, default_height  # Giá trị mặc định
+
     window_x, window_y = 0, 0
     reset_pos = [0, 0]
 
